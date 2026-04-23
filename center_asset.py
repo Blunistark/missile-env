@@ -17,7 +17,7 @@ def center_missile():
     # Get the prim and its bounding box
     stage = world.stage
     prim = stage.GetPrimAtPath(prim_path)
-    bbox_cache = UsdGeom.BboxCache(UsdGeom.GetStageTimeCodesRange(stage)[0], [UsdGeom.Tokens.default_])
+    bbox_cache = UsdGeom.BBoxCache(UsdGeom.GetStageTimeCodesRange(stage)[0], [UsdGeom.Tokens.default_])
     bbox = bbox_cache.ComputeWorldBound(prim)
     
     # Calculate the exact center of the bounding box
