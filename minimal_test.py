@@ -18,8 +18,8 @@ def run_minimal():
     print(f"🚀 Loading missile from: {missile_usd}")
     add_reference_to_stage(usd_path=missile_usd, prim_path=prim_path)
     
-    # Use XFormPrim (no physics properties to crash)
-    missile = XFormPrim(prim_path=prim_path, name="test_missile")
+    # Use SingleXFormPrim (no physics properties to crash)
+    missile = SingleXFormPrim(prim_path=prim_path, name="test_missile")
     
     world.reset()
     
