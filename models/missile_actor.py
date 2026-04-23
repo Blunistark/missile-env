@@ -56,8 +56,8 @@ class MissileActor:
         
         inertia = np.array([ix, iy, iy])
         
-        self.view.set_masses(np.array([m]))
-        self.view.set_inertia_tensors(inertia.reshape(1, 3))
+        self.view.set_mass(m)
+        self.view.set_inertia_tensor(inertia)
 
     def set_pose(self, position: np.ndarray, orientation: np.ndarray):
         """Atomically sets the world pose of the missile.
