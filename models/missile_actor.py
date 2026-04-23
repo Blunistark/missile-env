@@ -54,11 +54,17 @@ class MissileActor:
         ix = 0.5 * m * (r**2)
         iy = (1.0/12.0) * m * (3*(r**2) + h**2)
         
-        inertia = np.array([ix, iy, iy])
+        from pxr import Gf
         
-        # SingleRigidPrim uses singular API
-        self.view.set_mass(m)
-        self.view.set_inertia_tensor(inertia)
+        # Direct USD attribute access is the most robust way across Isaac Sim versions
+        prim = self.view.get_prim()
+        if prim.IsValid():
+            # Set Mass
+            prim.GetAttribute("physics:mass").Set(m)
+            # Set Diagonal Inertia (Cylindrical approximation)
+            prim.GetAttribute("physics:diagonalInertia").Set(Gf.Vec3f(ix, iy, iy))
+            # Ensure auto-computation is disabled so our values stick
+            prim.GetAttribute("physics:propagateInertia").Set(False)
 
     def set_pose(self, position: np.ndarray, orientation: np.ndarray):
         """Atomically sets the world pose of the missile.
