@@ -11,20 +11,20 @@ def run_minimal():
     world = World(stage_units_in_meters=1.0)
     world.scene.add_default_ground_plane()
     
-    # Simple static reference
-    missile_usd = "C:/IsaacLab/BrahMos_Red.usd"  # Using the path from your config
+    # Using the exact path from BRAHMOS_CONFIG
+    missile_usd = "C:/IsaacLab/assests/BrahMos.usdz"
     prim_path = "/World/StaticMissile"
     
-    print(f"🚀 Loading missile from: {missile_usd}")
+    print(f"🚀 Loading BrahMos from: {missile_usd}")
     add_reference_to_stage(usd_path=missile_usd, prim_path=prim_path)
     
-    # Use SingleXFormPrim (no physics properties to crash)
+    # Use SingleXFormPrim
     missile = SingleXFormPrim(prim_path=prim_path, name="test_missile")
     
     world.reset()
     
-    # Set a test pose: 5m high, looking slightly up
-    # Orientation: [w, x, y, z]
+    # Apply official scale [100, 100, 100] and position at (0,0,5)
+    missile.set_local_scale(np.array([100.0, 100.0, 100.0]))
     missile.set_world_pose(
         position=np.array([0.0, 0.0, 5.0]),
         orientation=np.array([1.0, 0.0, 0.0, 0.0])
