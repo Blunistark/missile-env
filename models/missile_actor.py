@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from isaacsim.core.utils.stage import add_reference_to_stage
-from isaacsim.core.prims import RigidPrimView, SingleRigidPrim, SingleXFormPrim
+from isaacsim.core.prims import SingleRigidPrim, SingleXFormPrim
 from isaacsim.core.utils.physics import set_rigid_body_enabled
 
 from configs.missile_config import MissileConfig
