@@ -4,7 +4,7 @@ simulation_app = SimulationApp({"headless": False})
 import numpy as np
 from isaacsim.core.api import World
 from isaacsim.core.api.objects import GroundPlane
-from isaacsim.core.prims import XFormPrim
+from isaacsim.core.prims import SingleXFormPrim
 from isaacsim.core.utils.stage import add_reference_to_stage
 
 def run_minimal():
