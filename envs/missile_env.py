@@ -177,7 +177,7 @@ class TacticalCombatEnv:
             self.interceptor.view.set_world_poses(positions=np.array([i_fixed_pos]), orientations=np.array([i_fixed_quat]))
             self.interceptor.view.set_linear_velocities(np.array([[0.0, 0.0, 0.0]]))
 
-        self._orient_missiles(b_pos, i_pos)
+        self._orient_missiles(b_pos_np, i_pos_np)
 
         # 4. Terminations
         terminated, outcome = False, "IN_FLIGHT"
@@ -199,8 +199,8 @@ class TacticalCombatEnv:
 
         return obs, reward, terminated, False, {"outcome": outcome}
 
-    def _orient_missiles(self, b_pos, i_pos):
-        # Utility to align missile model with velocity vector using quaternions
+    def _orient_missiles(self, b_pos_np, i_pos_np):
+        """Utility to align missile model with velocity vector using quaternions."""
         def _get_velocity_quat(vel: torch.Tensor):
             speed = torch.norm(vel)
             if speed < 1.0: return torch.tensor([1.0, 0.0, 0.0, 0.0], device=self.device) 
@@ -229,7 +229,7 @@ class TacticalCombatEnv:
         if torch.norm(b_vel) > 1.0:
             vel_quat = _get_velocity_quat(b_vel)
             final_quat = _quat_mult(vel_quat, BRAHMOS_CONFIG.spawn_quat.to(self.device))
-            self.brahmos.view.set_world_poses(orientations=np.array([final_quat.cpu().numpy()]))
+            self.brahmos.set_pose(b_pos_np[0], final_quat.cpu().numpy())
         
         # Interceptor Orientation
         if self.interceptor_launched:
@@ -237,4 +237,5 @@ class TacticalCombatEnv:
             i_vel = torch.tensor(i_vel_np, device=self.device, dtype=torch.float32)
             if torch.norm(i_vel) > 1.0:
                 vel_quat = _get_velocity_quat(i_vel)
-                self.interceptor.view.set_world_poses(orientations=np.array([vel_quat.cpu().numpy()]))
+                final_quat = _quat_mult(vel_quat, INTERCEPTOR_CONFIG.spawn_quat.to(self.device))
+                self.interceptor.set_pose(i_pos_np[0], final_quat.cpu().numpy())

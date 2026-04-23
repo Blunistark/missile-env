@@ -50,17 +50,27 @@ class MissileActor:
         """
         m = self.current_mass.cpu().item()
         # Cylindrical approximation (h=6m, r=0.3m)
-        # Ix = 0.5 * m * r^2
-        # Iy = Iz = (1/12) * m * (3r^2 + h^2)
         r, h = 0.3, 6.0
         ix = 0.5 * m * (r**2)
         iy = (1.0/12.0) * m * (3*(r**2) + h**2)
         
         inertia = np.array([ix, iy, iy])
         
-        # Apply to the view (Must be called after the prim is initialized in the scene)
         self.view.set_masses(np.array([m]))
         self.view.set_inertia_tensors(inertia.reshape(1, 3))
+
+    def set_pose(self, position: np.ndarray, orientation: np.ndarray):
+        """Atomically sets the world pose of the missile.
+        
+        Args:
+            position (np.ndarray): Shape (3,) [XYZ]
+            orientation (np.ndarray): Shape (4,) [WXYZ]
+        """
+        # RigidPrimView.set_world_poses expects (N, 3) and (N, 4)
+        self.view.set_world_poses(
+            positions=position.reshape(1, 3), 
+            orientations=orientation.reshape(1, 4)
+        )
 
     def apply_flight_forces(self, throttle: torch.Tensor, lift_cmd: torch.Tensor, forward_dir: torch.Tensor, dt: float):
         """Calculates and applies aerodynamic and thrust forces.
