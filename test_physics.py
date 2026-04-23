@@ -16,7 +16,6 @@ def run_physics_bench():
     
     # Initialize a single BrahMos missile
     brahmos = MissileActor(
-        prim_path="/World/BrahMos_Test", 
         name="BrahMos_Test", 
         config=BRAHMOS_CONFIG
     )
