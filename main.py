@@ -16,11 +16,15 @@ def main():
     env = TacticalCombatEnv(device=device)
     obs, info = env.reset()
     
-    # Simple control loop
+    # Simple multi-agent control loop
     for i in range(1000):
-        # Action: [Throttle (0 to 1), Lift (-1 to 1)]
-        # For now, just cruise forward with full throttle and slight lift
-        action = torch.tensor([1.0, 0.05], device=device)
+        # Action shape: (2, 2) -> [[Agent0_Throttle, Agent0_Lift], [Agent1_Throttle, Agent1_Lift]]
+        # BrahMos: Full throttle, slight lift
+        # Interceptor: Full throttle, zero lift (initially)
+        action = torch.tensor([
+            [1.0, 0.05], # Agent 0: BrahMos
+            [1.0, 0.00]  # Agent 1: Interceptor
+        ], device=device)
         
         obs, reward, terminated, truncated, info = env.step(action)
         

@@ -43,6 +43,25 @@ class MissileActor:
     def fuel_mass(self, value: torch.Tensor):
         self.dynamics.fuel_mass = value
 
+    def setup_physics_properties(self):
+        """Sets explicit inertia and mass to ensure solver stability.
+        
+        Uses a cylindrical approximation for a missile shape.
+        """
+        m = self.current_mass.cpu().item()
+        # Cylindrical approximation (h=6m, r=0.3m)
+        # Ix = 0.5 * m * r^2
+        # Iy = Iz = (1/12) * m * (3r^2 + h^2)
+        r, h = 0.3, 6.0
+        ix = 0.5 * m * (r**2)
+        iy = (1.0/12.0) * m * (3*(r**2) + h**2)
+        
+        inertia = np.array([ix, iy, iy])
+        
+        # Apply to the view (Must be called after the prim is initialized in the scene)
+        self.view.set_masses(np.array([m]))
+        self.view.set_inertia_tensors(inertia.reshape(1, 3))
+
     def apply_flight_forces(self, throttle: torch.Tensor, lift_cmd: torch.Tensor, forward_dir: torch.Tensor, dt: float):
         """Calculates and applies aerodynamic and thrust forces.
         

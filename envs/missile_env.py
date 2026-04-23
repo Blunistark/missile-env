@@ -96,6 +96,10 @@ class TacticalCombatEnv:
         self.brahmos.fuel_mass = torch.tensor(BRAHMOS_CONFIG.fuel_mass, device=self.device)
         self.interceptor.fuel_mass = torch.tensor(INTERCEPTOR_CONFIG.fuel_mass, device=self.device)
         
+        # Initialize Physics Properties (Inertia/Mass) to fix warnings
+        self.brahmos.setup_physics_properties()
+        self.interceptor.setup_physics_properties()
+
         # Spawn BrahMos
         b_pos = np.array([self.config.spawn_dist_x, 0.0, self.config.cruise_altitude])
         b_quat = BRAHMOS_CONFIG.spawn_quat.cpu().numpy()
@@ -111,15 +115,18 @@ class TacticalCombatEnv:
         return self._get_observations(), {}
 
     def step(self, action: torch.Tensor):
-        """Action should be torch.Tensor of shape (2,) -> [throttle, lift]"""
-        # 1. BrahMos Logic
+        """Action should be torch.Tensor of shape (2, 2)
+        - action[0]: BrahMos [throttle, lift]
+        - action[1]: Interceptor [throttle, lift]
+        """
+        # 1. BrahMos Logic (Agent 0)
         b_vel_np = self.brahmos.view.get_linear_velocities()[0]
         b_vel = torch.tensor(b_vel_np, device=self.device, dtype=torch.float32)
         speed = torch.norm(b_vel)
         b_fwd = (b_vel / speed) if speed > 1.0 else torch.tensor([1.0, 0.0, 0.0], device=self.device)
         
         self.brahmos.apply_flight_forces(
-            throttle=action[0], lift_cmd=action[1], forward_dir=b_fwd, dt=self.dt
+            throttle=action[0, 0], lift_cmd=action[0, 1], forward_dir=b_fwd, dt=self.dt
         )
 
         self.world.step(render=True)
@@ -130,7 +137,7 @@ class TacticalCombatEnv:
         b_pos = torch.tensor(b_pos_np[0], device=self.device, dtype=torch.float32)
         i_pos = torch.tensor(i_pos_np[0], device=self.device, dtype=torch.float32)
         
-        # 2. S-400 Radar & Launch
+        # 2. S-400 Radar & Launch (Automated Trigger)
         s400_pos = self.config.s400_pos.to(self.device)
         dist_to_s400 = torch.norm(b_pos - s400_pos)
         
@@ -140,21 +147,26 @@ class TacticalCombatEnv:
         if (dist_to_s400 < max_los) and (dist_to_s400 < self.config.s400_launch_range) and not self.interceptor_launched:
             self.interceptor_launched = True
 
-        # 3. Interceptor Logic
+        # 3. Interceptor Logic (Agent 1)
         if self.interceptor_launched:
             alt = i_pos[2]
             if alt < 100.0 and not self.interceptor_ignition:
+                # Ejection phase (Automated cold launch)
                 ejection_force = self.interceptor.current_mass * 9.81 * 10.0 
                 self.interceptor.view.apply_forces(np.array([[0.0, 0.0, ejection_force.cpu().item()]]))
             else:
                 if not self.interceptor_ignition:
                     self.interceptor_ignition = True
                 
-                i_fwd = (b_pos - i_pos)
-                i_fwd /= torch.norm(i_fwd)
+                # Interceptor is now controlled by Agent 1's action
+                i_vel_np = self.interceptor.view.get_linear_velocities()[0]
+                i_vel = torch.tensor(i_vel_np, device=self.device, dtype=torch.float32)
+                i_speed = torch.norm(i_vel)
+                i_fwd = (i_vel / i_speed) if i_speed > 1.0 else torch.tensor([1.0, 0.0, 0.0], device=self.device)
+
                 self.interceptor.apply_flight_forces(
-                    throttle=torch.tensor(1.0, device=self.device), 
-                    lift_cmd=torch.tensor(0.0, device=self.device), 
+                    throttle=action[1, 0], 
+                    lift_cmd=action[1, 1], 
                     forward_dir=i_fwd, dt=self.dt
                 )
         else:
