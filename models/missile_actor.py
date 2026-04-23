@@ -29,7 +29,7 @@ class MissileActor:
             SingleXFormPrim(prim_path=prim_path, name=f"{name}_setup").set_local_scale(scale_np)
             set_rigid_body_enabled(True, prim_path)
             
-        self.view = RigidPrimView(prim_paths_expr=prim_path, name=f"{name}_view")
+        self.view = SingleRigidPrim(prim_path=prim_path, name=f"{name}_view")
 
     @property
     def current_mass(self) -> torch.Tensor:
@@ -54,11 +54,11 @@ class MissileActor:
         ix = 0.5 * m * (r**2)
         iy = (1.0/12.0) * m * (3*(r**2) + h**2)
         
-        inertia = np.array([[ix, iy, iy]])
+        inertia = np.array([ix, iy, iy])
         
-        # Using plural API with explicit indices for this Isaac Sim version
-        self.view.set_masses(np.array([m]), indices=np.array([0]))
-        self.view.set_inertia_tensors(inertia, indices=np.array([0]))
+        # SingleRigidPrim uses singular API
+        self.view.set_mass(m)
+        self.view.set_inertia_tensor(inertia)
 
     def set_pose(self, position: np.ndarray, orientation: np.ndarray):
         """Atomically sets the world pose of the missile.
