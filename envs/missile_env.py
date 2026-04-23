@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-from pxr import UsdLux, Sdf
 
 from isaacsim.core.api import World
 from isaacsim.core.api.objects import FixedCuboid, VisualSphere
@@ -8,6 +7,7 @@ from isaacsim.core.prims import SingleXFormPrim
 from isaacsim.core.utils.viewports import set_camera_view 
 from isaacsim.util.debug_draw import _debug_draw as omni_debug_draw
 from isaacsim.core.utils.stage import add_reference_to_stage
+from isaacsim.core.utils.prims import create_prim
 
 from configs.missile_config import BRAHMOS_CONFIG, INTERCEPTOR_CONFIG, S400_PATH
 from configs.scenario_config import DEFAULT_SCENARIO, ScenarioConfig
@@ -30,7 +30,12 @@ class TacticalCombatEnv:
 
     def _setup_world(self):
         stage = self.world.stage
-        UsdLux.DistantLight.Define(stage, Sdf.Path("/World/Sun")).CreateIntensityAttr(6000.0)
+        # Modern way to define lights without direct pxr dependency
+        create_prim(
+            prim_path="/World/Sun",
+            prim_type="DistantLight",
+            attributes={"inputs:intensity": 6000.0}
+        )
 
         # 1. Ground Map
         land_size = self.config.land_size
@@ -154,6 +159,7 @@ class TacticalCombatEnv:
                 )
         else:
             # Keep on launcher
+            s400_pos_np = self.config.s400_pos.cpu().numpy()
             i_fixed_pos = np.array([s400_pos_np[0], s400_pos_np[1], 10.0])
             i_fixed_quat = INTERCEPTOR_CONFIG.spawn_quat.cpu().numpy()
             self.interceptor.view.set_world_poses(positions=np.array([i_fixed_pos]), orientations=np.array([i_fixed_quat]))
