@@ -29,7 +29,7 @@ class MissileActor:
             SingleXFormPrim(prim_path=prim_path, name=f"{name}_setup").set_local_scale(scale_np)
             set_rigid_body_enabled(True, prim_path)
             
-        self.view = RigidPrim(prim_paths_expr=prim_path, name=f"{name}_view")
+        self.view = RigidPrim(prim_path=prim_path, name=f"{name}_view")
 
     @property
     def current_mass(self) -> torch.Tensor:
