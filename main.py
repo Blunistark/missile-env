@@ -1,3 +1,9 @@
+from isaacsim import SimulationApp
+
+# 1. Start the SimulationApp helper class BEFORE any other isaacsim/torch imports
+# This initializes the underlying Omniverse runtime plugins
+simulation_app = SimulationApp({"headless": False})
+
 import torch
 from envs.missile_env import TacticalCombatEnv
 
