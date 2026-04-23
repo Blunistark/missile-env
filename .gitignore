@@ -1,3 +1,17 @@
 # IsaacLab
 IsaacLab/
 env_isaaclab/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Isaac Lab / Isaac Sim
+logs/
+outputs/
+data/
+*.usd
+*.usda
+
+# Temp files
+.git/index.lock
