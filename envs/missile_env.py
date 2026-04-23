@@ -197,7 +197,7 @@ class TacticalCombatEnv:
             dot = torch.dot(v1, fwd)
             if dot > 0.9999: return torch.tensor([1.0, 0.0, 0.0, 0.0], device=self.device)
             if dot < -0.9999: return torch.tensor([0.0, 0.0, 0.0, 1.0], device=self.device)
-            cross = torch.cross(v1, fwd)
+            cross = torch.linalg.cross(v1, fwd)
             q = torch.tensor([1.0 + dot, cross[0], cross[1], cross[2]], device=self.device)
             return q / torch.norm(q)
 

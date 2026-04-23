@@ -31,7 +31,8 @@ def main():
             print(f"💥 Episode Finished! Outcome: {info['outcome']} | Final Reward: {reward.item():.2f}")
             break
 
-    env.world.close()
+    # Shutdown the simulation app
+    simulation_app.close()
 
 if __name__ == "__main__":
     main()
