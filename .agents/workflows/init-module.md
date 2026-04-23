@@ -1,0 +1,5 @@
+---
+description: Scaffolds new architectural components (environments, physics models, or training utilities) while strictly adhering to the decoupled workspace structure and modern API namespaces.
+---
+
+Scaffold a new modular component for this workspace. First, ask me to define the component's role: is it a new Isaac Lab environment task, a vehicle dynamics model bridging external physics like JSBSim, or a PPO training utility? Once defined, generate the boilerplate Python class and an associated, isolated configuration class. Ensure strict type hinting, modular imports, and that no logic is hardcoded. Crucially, all generated code must exclusively use the modern isaacsim.* API namespace (e.g., from isaacsim.core.api import World) and entirely avoid legacy omni.isaac.* or omni.isaac.lab imports. The output must perfectly fit into our decoupled envs/, models/, or training/ directory architecture.
