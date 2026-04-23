@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from isaacsim.core.utils.stage import add_reference_to_stage
-from isaacsim.core.prims import RigidPrim, SingleRigidPrim, SingleXFormPrim
+from isaacsim.core.prims import RigidPrimView, SingleRigidPrim, SingleXFormPrim
 from isaacsim.core.utils.physics import set_rigid_body_enabled
 
 from configs.missile_config import MissileConfig
@@ -29,7 +29,7 @@ class MissileActor:
             SingleXFormPrim(prim_path=prim_path, name=f"{name}_setup").set_local_scale(scale_np)
             set_rigid_body_enabled(True, prim_path)
             
-        self.view = RigidPrim(prim_paths_expr=prim_path, name=f"{name}_view")
+        self.view = RigidPrimView(prim_paths_expr=prim_path, name=f"{name}_view")
 
     @property
     def current_mass(self) -> torch.Tensor:
